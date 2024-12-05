@@ -1,10 +1,10 @@
-# Proof of Concept: Serverless Next.js Application on AWS using CDK (Pages Router)
+# Proof of Concept: Serverless Next.js (page router) Application on AWS using [cdk-nextjs](https://github.com/jetbridge/cdk-nextjs/)
 
 Aaron Medina | [GitHub](https://github.com/aaronmedina-dev) | [Linkedin](https://www.linkedin.com/in/aamedina/)
 
 ## Overview
 
-This guide explains how to deploy a Next.js application using the Pages Router on AWS with **cdk-nextjs-standalone**. It supports:
+This guide explains how to deploy a Next.js (page router) application on AWS with **cdk-nextjs-standalone**. It supports:
 
 - **Server-side rendering (SSR)** for dynamic content.
 - **Dynamic routing** for flexible URLs.
