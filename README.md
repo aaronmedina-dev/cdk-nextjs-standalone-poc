@@ -1,5 +1,7 @@
 # Proof of Concept: Serverless Next.js Application on AWS using CDK (Pages Router)
 
+Aaron Medina | [GitHub](https://github.com/aaronmedina-dev) | [Linkedin](https://www.linkedin.com/in/aamedina/)
+
 ## Overview
 
 This guide explains how to deploy a Next.js application using the Pages Router on AWS with **cdk-nextjs-standalone**. It supports:
@@ -13,8 +15,10 @@ The architecture leverages **AWS Lambda**, **CloudFront**, and **S3** to provide
 
 ## References
 - [Next.js Documentation](https://nextjs.org/docs)
+- [OpenNext Documentation](https://opennext.js.org/)
 - [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
-- [cdk-nextjs-standalone GitHub](https://github.com/serverless-nextjs/cdk-nextjs-standalone)
+- [cdk-nextjs-standalone GitHub](https://github.com/jetbridge/cdk-nextjs/)
+- [cdk-nextjs-standalone ConstructHub](https://constructs.dev/packages/cdk-nextjs-standalone/)
 
 ## Recommended Set-up from [OpenNext](https://opennext.js.org/aws/inner_workings/architecture)
 
@@ -22,9 +26,13 @@ The architecture leverages **AWS Lambda**, **CloudFront**, and **S3** to provide
 
 More information about the components [here](https://opennext.js.org/aws/inner_workings/architecture)
 
+## PoC Output
+
+![PoC Output](assets/poc_output.png)
+
 ---
 
-# Set-up and Core Components Implementation
+# Set-up and Core Implementation
 
 ## Prerequisites
 
@@ -607,6 +615,13 @@ More information about the components [here](https://opennext.js.org/aws/inner_w
 7. **Static File**: Static data has been consumed in Homepage.
 
 
+# Warmer Implementation - WIP
+
+To follow.
+
+# ISR Revalidation Implementation - WIP
+
+To follow.
 
 ---
 

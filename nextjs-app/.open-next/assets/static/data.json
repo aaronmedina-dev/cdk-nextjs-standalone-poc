@@ -1,4 +1,4 @@
 {
-    "title": "Welcome to Next.js on AWS with TypeScript! <- loaded from data.json",
-    "description": "Your serverless app with SSR, dynamic routes, and image optimization. <- loaded from data.json"
+    "title": "Welcome to Next.js on AWS with TypeScript!",
+    "description": "Description: Your serverless app with SSR, dynamic routes, and image optimization."
   }
