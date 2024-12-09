@@ -1,1 +1,0 @@
-{"/_app":"pages/_app.js","/_document":"pages/_document.js","/api/hello":"pages/api/hello.js","/_error":"pages/_error.js","/":"pages/index.html","/api/lambda":"pages/api/lambda.js","/dynamic/[slug]":"pages/dynamic/[slug].js","/dynamic/page-ssr":"pages/dynamic/page-ssr.js","/ssr":"pages/ssr.js","/404":"pages/404.html"}
