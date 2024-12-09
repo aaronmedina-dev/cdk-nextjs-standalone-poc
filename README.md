@@ -745,6 +745,12 @@ We have added here a Warmer Lambda Function and Eventbridge rule for invoking th
 
 Step 2. Rebuild and Deploy. 
 
+    ```bash
+    npx tsc ./nextjs-app/src/pages/api/lambda.ts --outDir ./dist
+
+    cdk deploy
+    ```
+
     You should be able to see the new Rule created in Eventbridge targetting the Lambda function containing the inline script.
 
 ### Testing Warmer Components
