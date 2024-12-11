@@ -10,10 +10,6 @@ const nextConfig = {
         dangerouslyAllowSVG: true, // Enable SVG optimization
         contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;", // Secure SVGs
   },
-  experimental: {
-    isrMemoryCacheSize: 0, // Disable memory cache for ISR, will force to rely on S3
-  },
-
 
 };
 

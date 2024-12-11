@@ -12,7 +12,6 @@ export class ServerlessNextjsPocStack extends Stack {
 
         const nextJsSite = new Nextjs(this, 'NextjsSite', {
             nextjsPath: './nextjs-app', // Path to the built Next.js app
-
         });
 
         //************* ADDED WARMER USING /.open-next/warmer-function *************//

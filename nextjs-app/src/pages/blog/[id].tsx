@@ -1,4 +1,11 @@
 import { GetStaticProps, GetStaticPaths } from 'next';
+interface BlogPostProps {
+    post: { 
+        id: string;
+        title: string; 
+        content: string; 
+    };
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
     return {
@@ -9,55 +16,69 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
     const id = context.params?.id;
-    console.log('Requested ID:', id);
 
     try {
+        if (!id || typeof id !== 'string') {
+            return { notFound: true };
+        }
+
         const response = await fetch('https://d34zwmtiebwwbl.cloudfront.net/data/posts.json');
+
         if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-            console.error('Invalid response from posts.json:', response.status);
-            throw new Error('Invalid response from posts.json');
+            throw new Error(`Invalid response from posts.json: ${response.status}`);
         }
 
         const posts = await response.json();
-        console.log('Fetched posts:', posts);
+
+        if (!Array.isArray(posts)) {
+            throw new Error('Invalid posts data format');
+        }
 
         const post = posts.find((p: { id: string }) => p.id === id);
-        console.log('Found post:', post);
 
         if (!post) {
             return { notFound: true };
         }
 
-        console.log('Serialized post:', JSON.stringify(post)); 
+        const sanitizedPost = JSON.parse(JSON.stringify(post));
+        if (!sanitizedPost || typeof sanitizedPost.title !== 'string' || typeof sanitizedPost.content !== 'string') {
+            throw new Error('Invalid post data');
+        }
 
+        console.log('Final props:', sanitizedPost);
         return {
-            props: { post },
+            props: { post: sanitizedPost },
             revalidate: 60,
         };
     } catch (error) {
-        console.error('Error in getStaticProps:', error);
+        if (error instanceof Error) {
+            console.error('Error in getStaticProps:', error.message);
+        } else {
+            console.error('Unknown error in getStaticProps:', error);
+        }
         return { notFound: true };
     }
 };
 
-const BlogPost = ({ post }: { post: { title: string; content: string } }) => {
-    console.log('Rendered post:', post); 
 
-    // Debug: log HTML content
-    const htmlContent = `<div><h1>${post.title}</h1><p>${post.content}</p></div>`;
-    console.log('Generated HTML:', htmlContent);
 
+// create blogpost react post: { title: string; content: string }
+
+const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
+    if (!post) {
+        return <div>Error: Post data is missing</div>;
+    }
     return (
-        <>
-            <div>
-                <h1>{post.title}</h1>
-                <p>{post.content}</p>
-            </div>
-        </>
+        <div>
+            <h1>{post.title}</h1>
+            <p>{post.content}</p>
+        </div>
     );
 };
 
 export default BlogPost;
+
+
 
 
 
