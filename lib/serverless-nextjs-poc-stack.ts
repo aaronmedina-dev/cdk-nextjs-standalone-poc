@@ -12,6 +12,7 @@ export class ServerlessNextjsPocStack extends Stack {
 
         const nextJsSite = new Nextjs(this, 'NextjsSite', {
             nextjsPath: './nextjs-app', // Path to the built Next.js app
+
         });
 
         //************* ADDED WARMER USING /.open-next/warmer-function *************//
@@ -87,7 +88,7 @@ export class ServerlessNextjsPocStack extends Stack {
 
         // Schedule the warmer Lambda Function, added multiple warmer type targets to the rule
         new Rule(this, 'WarmerSchedule', {
-            schedule: Schedule.rate(Duration.minutes(5)), // Run every 5 minutes
+            schedule: Schedule.rate(Duration.minutes(240)), // Run every X minutes
             targets: [new LambdaFunction(openNextWarmerFunction), new LambdaFunction(customWarmer)], // add multiple targets here
             
         });
