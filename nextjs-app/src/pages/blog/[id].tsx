@@ -16,39 +16,40 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
     const id = context.params?.id;
+    console.log('Requested ID:', id);
 
     try {
-        if (!id || typeof id !== 'string') {
-            return { notFound: true };
-        }
-
         const response = await fetch('https://d34zwmtiebwwbl.cloudfront.net/data/posts.json');
 
-        if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error(`Invalid response from posts.json: ${response.status}`);
+        if (!response.ok) {
+            console.error('Invalid response from posts.json:', response.status);
+            throw new Error('Failed to fetch posts.json');
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('Invalid content type:', contentType);
+            throw new Error('Invalid content type from posts.json');
         }
 
         const posts = await response.json();
-
-        if (!Array.isArray(posts)) {
-            throw new Error('Invalid posts data format');
-        }
+        console.log('Fetched posts:', posts);
 
         const post = posts.find((p: { id: string }) => p.id === id);
+        console.log('Found post:', post);
 
         if (!post) {
+            console.warn('Post not found, returning 404');
             return { notFound: true };
         }
 
+        // Ensure post is serializable
         const sanitizedPost = JSON.parse(JSON.stringify(post));
-        if (!sanitizedPost || typeof sanitizedPost.title !== 'string' || typeof sanitizedPost.content !== 'string') {
-            throw new Error('Invalid post data');
-        }
 
-        console.log('Final props:', sanitizedPost);
+        console.log('Serialized post:', sanitizedPost);
         return {
             props: { post: sanitizedPost },
-            revalidate: 60,
+            revalidate: 60, // Revalidate every 60 seconds
         };
     } catch (error) {
         if (error instanceof Error) {
@@ -59,7 +60,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
         return { notFound: true };
     }
 };
-
 
 
 // create blogpost react post: { title: string; content: string }
