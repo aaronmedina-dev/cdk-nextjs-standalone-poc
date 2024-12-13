@@ -9,7 +9,7 @@ interface BlogPostProps {
 
 export const getStaticPaths: GetStaticPaths = async () => {
     return {
-        paths: [{ params: { id: '1' } }, { params: { id: '2' } }],
+        paths: [{ params: { id: '1' } }, { params: { id: '2' } }], 
         fallback: 'blocking', // ISR for non-pre-rendered pages
     };
 };
@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     console.log('Requested ID:', id);
 
     try {
-        const response = await fetch('https://d34zwmtiebwwbl.cloudfront.net/data/posts.json');
+        const response = await fetch('https://d34zwmtiebwwbl.cloudfront.net/data/posts.json'); // HARDCODED FOR NOW - TECHNICAL DEBT
 
         if (!response.ok) {
             console.error('Invalid response from posts.json:', response.status);
@@ -47,6 +47,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
         const sanitizedPost = JSON.parse(JSON.stringify(post));
 
         console.log('Serialized post:', sanitizedPost);
+
+        console.log(`[ISR] Regenerating page at ${new Date().toISOString()}`);
+        
         return {
             props: { post: sanitizedPost },
             revalidate: 60, // Revalidate every 60 seconds

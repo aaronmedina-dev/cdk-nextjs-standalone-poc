@@ -767,7 +767,216 @@ Step 2. Rebuild and Deploy.
 
 # ISR Revalidation Implementation - WIP
 
-To follow.
+See diagram above for the architecture.
+
+ISR allows you to regenerate static pages at runtime, enabling you to update pre-rendered content without rebuilding your entire application. 
+
+### How it Works
+
+**Initial Build**
+
+- When you deploy your Next.js app, pages specified in getStaticPaths are statically generated and stored.
+
+**On Request**
+
+- If a request is made to a page:
+    - If it’s already generated, the cached version is served.
+    - If the page is not generated (fallback: true or blocking), it will be rendered on the fly and cached.
+
+**Revalidation**
+
+- The revalidate property defines the time in seconds to wait before the next regeneration.
+- If a request comes after the revalidate time has passed:
+    - A new version of the page is generated in the background (for revalidate).
+
+**Serving Pages**
+
+- While the new page is being regenerated, the cached version is served to avoid downtime.
+- Once the new page is ready, subsequent requests will get the updated version.
+
+
+Step 1. Add static data `nextjs-app/public/data/posts.json`
+
+```bash
+mkdir -p nextjs-app/public/data && touch nextjs-app/public/data/posts.json
+```
+
+```json
+[
+    {
+        "id": "1",
+        "title": "First Blog Post - 5 Mins. Change Test",
+        "content": "This is the content of the first post."
+    },
+    {
+        "id": "2",
+        "title": "Second Blog Post",
+        "content": "This is the content of the second post."
+    }
+]
+```
+
+Step 2. Add ISR test page nextjs-app/src/pages/isr-test/[id].tsx
+
+```bash
+mkdir -p nextjs-app/src/pages && touch nextjs-app/src/pages/isr-test/[id].tsx
+```
+
+Step 3. (OPTIONAL) Add revalidation api for manual revalidation
+
+```bash
+mkdir -p nextjs-app/src/pages/api && touch nextjs-app/src/pages/api/revalidate.ts
+```
+
+```typescript
+import { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    // Ensure the request is coming as a POST (recommended for security)
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Only POST requests are allowed' });
+    }
+
+    // Check if a secret token is included for security (to prevent unauthorized revalidation)
+    const secret = 'Obliviate'; // HARDCODED FOR NOW - TECHNICAL DEBT
+    if (req.query.secret !== secret) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    try {
+        const { path } = req.query;
+
+        if (!path) {
+            return res.status(400).json({ message: 'Path is required' });
+        }
+
+        // Trigger revalidation for the specified path
+        await res.revalidate(path as string);
+
+        return res.status(200).json({ message: `Successfully revalidated: ${path}` });
+    } catch (error) {
+        console.error('Error revalidating:', error);
+        return res.status(500).json({ message: 'Error revalidating' });
+    }
+}
+```
+
+
+
+```typescript
+import { GetStaticProps, GetStaticPaths } from 'next';
+interface BlogPostProps {
+    post: { 
+        id: string;
+        title: string; 
+        content: string; 
+    };
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+    return {
+        paths: [{ params: { id: '1' } }, { params: { id: '2' } }], 
+        fallback: 'blocking', // ISR for non-pre-rendered pages
+    };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+    const id = context.params?.id;
+    console.log('Requested ID:', id);
+
+    try {
+        const response = await fetch('https://d34zwmtiebwwbl.cloudfront.net/data/posts.json');
+
+        if (!response.ok) {
+            console.error('Invalid response from posts.json:', response.status);
+            throw new Error('Failed to fetch posts.json');
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('Invalid content type:', contentType);
+            throw new Error('Invalid content type from posts.json');
+        }
+
+        const posts = await response.json();
+        console.log('Fetched posts:', posts);
+
+        const post = posts.find((p: { id: string }) => p.id === id);
+        console.log('Found post:', post);
+
+        if (!post) {
+            console.warn('Post not found, returning 404');
+            return { notFound: true };
+        }
+
+        // Ensure post is serializable
+        const sanitizedPost = JSON.parse(JSON.stringify(post));
+
+        console.log('Serialized post:', sanitizedPost);
+        return {
+            props: { post: sanitizedPost },
+            revalidate: 60, // Revalidate every 60 seconds
+        };
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Error in getStaticProps:', error.message);
+        } else {
+            console.error('Unknown error in getStaticProps:', error);
+        }
+        return { notFound: true };
+    }
+};
+
+
+// create blogpost react post: { title: string; content: string }
+
+const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
+    if (!post) {
+        return <div>Error: Post data is missing</div>;
+    }
+    return (
+        <div>
+            <h1>{post.title}</h1>
+            <p>{post.content}</p>
+        </div>
+    );
+};
+
+export default BlogPost;
+```
+
+### Testing ISR Components
+
+1. Initial Build and Deployment
+
+    Deploy the application and access /isr-test/1. Note the content.
+
+2. Content Update
+
+    Modify posts.json to update the content for ID 1.
+
+3. Access During Revalidation:
+
+    Access /isr-test/1 before 60 seconds. You should still see the old content.
+
+4. Post-Revalidation
+
+    Wait for 60 seconds and access the page again. The new content should appear.
+
+    The 60 seconds wait time is based on the `revalidate: 60` configuration set in `[id].tsx`
+
+5. Test Fallback Behavior:
+
+    Access /isr-test/3 (not pre-rendered). Confirm that the page is generated dynamically.
+
+    Cache folder in S3 should not have an object for `/isr-test/3`
+
+6. Manual Revalidation (OPTIONAL - if API is added)
+
+    Add the revalidation API endpoint mentioned above.
+
+    Trigger the endpoint for /isr-test/1 after updating posts.json and verify that the page updates without waiting for 60 seconds.
+
 
 ---
 
