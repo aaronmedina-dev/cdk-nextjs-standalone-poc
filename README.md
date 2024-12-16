@@ -65,6 +65,8 @@ There are a few hard-coded parts to just make it work quicker.
 
 There are a few more that I have not tried like testing ISR for pages connected to DB, etc. I decided to use the simplest way to demonstrate/test a feature.
 
+I added all static resource in `public` folder.
+
 I used page router in this PoC, I know I should’ve used the app router 🤦‍♂️
 
 ## References
