@@ -67,6 +67,8 @@ There are a few more that I have not tried like testing ISR for pages connected 
 
 I added all static resource in `public` folder.
 
+Need to fix ESLint.
+
 I used page router in this PoC, I know I should’ve used the app router 🤦‍♂️
 
 ## References
