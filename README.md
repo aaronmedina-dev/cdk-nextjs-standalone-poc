@@ -11,6 +11,7 @@ This guide explains how to deploy a Next.js (page router) application on AWS wit
 - **Image optimization** for performance.
 - **Static assets** such as JSON files, served via CloudFront
 - **Warmer Function** Sends requests to configured endpoints to keep their corresponding Lmabda functions "warm".
+- **Incremental Static Regeneration (ISR)** Updates pre-rendered pages at runtime.
 
 The architecture leverages **AWS Lambda**, **CloudFront**, and **S3** to provide a scalable and serverless deployment.
 
